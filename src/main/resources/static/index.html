@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Music Compass</title>
+</head>
+<body>
+    <h1>Music Compass</h1>
+
+    <form id="searchForm">
+        <input type="text" id="keyword" placeholder="例: 夏、失恋、応援">
+        <button type="submit">検索</button>
+    </form>
+    <hr>
+
+    <div id="resultArea"></div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // ページ全体のリロードを止める（ここが肝）
+
+            const keyword = document.getElementById('keyword').value;
+            const resultArea = document.getElementById('resultArea');
+
+            if (!keyword.trim()) {
+                resultArea.innerHTML = ''; // 空なら何も表示しない
+                return;
+            }
+
+            fetch('/api/search?keyword=' + encodeURIComponent(keyword))
+                .then(response => response.json())
+                .then(songs => {
+                    if (songs.length === 0) {
+                        resultArea.innerHTML = '<p>うーん、「' + keyword + '」に合う曲が見つかりませんでした…😢</p>';
+                        return;
+                    }
+                    let html = '<h2>「' + keyword + '」にぴったりの曲はこちら！</h2>';
+                    html += '<ul style="list-style:none; padding-left:0;">';
+                    songs.forEach(song => {
+                        html += '<li><img src="' + song.imageUrl + '" width="80" height="80"> '
+                              + song.title + ' - ' + song.artist + '</li>';
+                    });
+                    html += '</ul>';
+                    resultArea.innerHTML = html;
+                });
+        });
+    </script>
+</body>
+</html>
