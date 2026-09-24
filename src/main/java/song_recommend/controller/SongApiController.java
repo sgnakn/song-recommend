@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController // ← @Controllerとの違いに注目
+@RestController
 public class SongApiController {
 
     @Autowired
@@ -17,7 +17,11 @@ public class SongApiController {
 
     @GetMapping("/api/search")
     public List<Song> search(@RequestParam String keyword) {
-        return songService.searchByKeyword(keyword);
-        // @RestControllerが自動でJSONに変換してくれる
+        return songService.searchByKeywords(keyword); // AND検索版に差し替え
+    }
+
+    @GetMapping("/api/random-keywords")
+    public List<String> randomKeywords() {
+        return songService.getRandomKeywords(5);
     }
 }
