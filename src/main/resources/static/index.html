@@ -300,10 +300,12 @@
 	        currentKeyword = keyword;
 
 	        if (!keyword.trim()) {
+				<!-- 入力が空文字であれば結果欄は何も表示しない -->
 	            resultArea.innerHTML = '';
 	            return;
 	        }
 
+		<!-- 検索中のアニメーション処理 -->
 	        let dotCount = 0;
 	        let cycleCount = 0;
 	        let animationDone = false;
@@ -319,9 +321,11 @@
 	                dotCount = 0;
 	                cycleCount++;
 	                if (cycleCount >= 2) {
+						<!--処理を止める-->
 	                    clearInterval(animationTimer);
 	                    animationDone = true;
 	                    if (fetchedSongs !== null) {
+							<!--もし検索結果がすでに届いていたら、ここで表示する-->
 	                        showResult(fetchedSongs);
 	                    }
 	                }
@@ -334,6 +338,7 @@
 	            .then(response => response.json())
 	            .then(songs => {
 	                if (animationDone) {
+					<!--アニメーションが終わっていたら-->
 	                    showResult(songs);
 	                } else {
 	                    fetchedSongs = songs;

@@ -37,3 +37,4 @@ build/
 *.mv.db
 *.trace.db
 .DS_Store
+secrets.properties
