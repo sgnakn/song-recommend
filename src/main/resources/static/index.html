@@ -22,7 +22,7 @@
 		.container {
 		    max-width: 800px;
 		    width: 100%;
-		    margin-top: 10px;  /* 60pxから10pxに変更 */
+		    margin-top: 10px;  
 		    padding: 24px;
 		    text-align: center;
 		}
@@ -36,8 +36,8 @@
 
 		.carousel-wrapper {
 		    position: relative;
-		    height: 280px;
-		    margin: 10px 0 10px 0;  /* 下側を30pxから10pxに変更 */
+		    height: 250px;  
+		    margin: 10px 0 10px 0;
 		    perspective: 1000px;
 		}
 
@@ -95,10 +95,35 @@
 		    text-align: center;
 		    margin-top: 12px;
 		}
-		/* ふわっとリンク表示 */
+
+		#linkWrapper {
+		    text-align: center;
+		    margin-top: 16px;
+		}
+
+		#linkArea {
+		    position: relative;
+		    display: inline-block;
+		    padding: 10px 18px;
+		    background-color: #fff;
+		    border: 1px solid #8a7654;
+		    border-radius: 16px;
+		}
+
+		#linkArea::after {
+		    content: '';
+		    position: absolute;
+		    top: -10px;
+		    left: 50%;
+		    transform: translateX(-50%);
+		    border-width: 0 8px 10px 8px;
+		    border-style: solid;
+		    border-color: transparent transparent #fff transparent;
+		}
+
 		.fade-in {
 		    opacity: 0;
-		    transition: opacity 1.3s;
+		    transition: opacity 0.6s;
 		}
 		.fade-in.show {
 		    opacity: 1;
@@ -176,17 +201,17 @@
 	        carouselSongs = songs;
 	        carouselIndex = 0;
 
-	        resultArea.innerHTML =
-			'<h2 style="margin-top: 40px; margin-bottom: -15px;">「' + currentKeyword + '」にぴったりの曲はこちら！</h2>' +
-	            '<div class="carousel-wrapper">' +
-	            '  <div class="carousel-stage" id="carouselStage"></div>' +
-	            '</div>' +
-	            '<div class="carousel-nav">' +
-	            '  <button type="button" id="prevBtn">‹</button>' +
-	            '  <button type="button" id="nextBtn">›</button>' +
-	            '</div>' +
-				<!-->'<div class='songLinksArea'></div>'+<-->
-	            '<div class="carousel-info" id="carouselInfo"></div>';
+			resultArea.innerHTML =
+			    '<h2 style="margin-top: 30px; margin-bottom: -10px;">「' + currentKeyword + '」にぴったりの曲はこちら！</h2>' +
+			    '<div class="carousel-wrapper">' +
+			    '  <div class="carousel-stage" id="carouselStage"></div>' +
+			    '</div>' +
+			    '<div class="carousel-nav">' +
+			    '  <button type="button" id="prevBtn">‹</button>' +
+			    '  <button type="button" id="nextBtn">›</button>' +
+			    '</div>' +
+			    '<div class="carousel-info" id="carouselInfo"></div>' +
+			    '<div id="linkWrapper"></div>';  // ← 新しく追加(リンク専用の置き場所)
 
 	        document.getElementById('prevBtn').addEventListener('click', () => moveCarousel(-1));
 	        document.getElementById('nextBtn').addEventListener('click', () => moveCarousel(1));
@@ -232,10 +257,7 @@
 		    stage.addEventListener('touchstart', (e) => onDragStart(e.touches[0].clientX));
 		    stage.addEventListener('touchmove', (e) => onDragMove(e.touches[0].clientX));
 		    stage.addEventListener('touchend', () => onDragEnd());
-		}
-		
-		
-		
+		}		
 		
 		
 		
@@ -293,26 +315,28 @@
 		}
 		
 
-	    function showSongLinks(song) {
-	        let html = '<div style="margin-top: 10px;">';
-	        if (song.spotifyUrl) {
-	            html += '<a href="' + song.spotifyUrl + '" target="_blank">Spotify</a> ';
-	        }
-	        if (song.appleMusicUrl) {
-	            html += '<a href="' + song.appleMusicUrl + '" target="_blank">Apple Music</a> ';
-	        }
-	        html += '<a href="' + song.youtubeUrl + '" target="_blank">YouTube</a>';
-	        html += '</div>';
+		function showSongLinks(song) {
+		    document.getElementById('carouselInfo').innerHTML =
+		        '<strong style="font-size:25px;">' + song.title + '</strong> - ' +
+		        '<span style="font-size:15px;">' + song.artist + '</span>';
 
-			document.getElementById('carouselInfo').innerHTML =
-			'<strong style="font-size:25px;">' + song.title + '</strong> - ' + 
-			'<span style="font-size:15px;">' + song.artist +  '</span>' +
-			'<div class="fade-in" id="linkArea">' + html + '</div>';
-			
-			setTimeout(() => {
-			    document.getElementById('linkArea').classList.add('show');
-			}, 1000);
-	    }
+		    let html = '';
+		    if (song.spotifyUrl) {
+		        html += '<a href="' + song.spotifyUrl + '" target="_blank">Spotify</a> ';
+		    }
+		    if (song.appleMusicUrl) {
+		        html += '<a href="' + song.appleMusicUrl + '" target="_blank">Apple Music</a> ';
+		    }
+		    html += '<a href="' + song.youtubeUrl + '" target="_blank">YouTube</a>';
+
+		    document.getElementById('linkWrapper').innerHTML =
+		        '<div class="fade-in" id="linkArea">' + html + '</div>';
+
+		    setTimeout(() => {
+		        const el = document.getElementById('linkArea');
+		        if (el) el.classList.add('show');
+		    }, 1000);
+		}
 
 		<!-- submitされたときの処理 -->
 	    document.getElementById('searchForm').addEventListener('submit', function(event) {
