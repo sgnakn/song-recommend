@@ -20,9 +20,9 @@
 		}
 
 		.container {
-		    max-width: 600px;
+		    max-width: 800px;
 		    width: 100%;
-		    margin-top: 60px;
+		    margin-top: 10px;  /* 60pxから10pxに変更 */
 		    padding: 24px;
 		    text-align: center;
 		}
@@ -95,14 +95,22 @@
 		    text-align: center;
 		    margin-top: 12px;
 		}
+		/* ふわっとリンク表示 */
+		.fade-in {
+		    opacity: 0;
+		    transition: opacity 1.3s;
+		}
+		.fade-in.show {
+		    opacity: 1;
+		}
 
 	</style>
 </head>
 <body>
 	<div class="container">
-		<img src="logo.png" alt="Music Compass" style="max-width: 280px; width: 100%; margin-bottom: 10px;">
+		<img src="logo.png" alt="Music Compass" style="max-width: 300px; width: 100%; margin-bottom: -20px;">
     <h3>キーワードで曲を探そう</h3>
-	<form id="searchForm" style="display: flex; justify-content: center; gap: 8px; margin-bottom: 12px;">
+	<form id="searchForm" style="display: flex; justify-content: center; gap: 8px;  margin-bottom: 12px;">
 	    <input type="text" id="keyword" placeholder="例: 夏 失恋 応援" style="flex: 1; max-width: 400px; padding: 10px 16px; font-size: 15px; border-radius: 20px; border: 1px solid #8a7654;">
 	    <button type="button" id="clearButton" style="padding: 10px 16px; border-radius: 20px; border: 1px solid #8a7654; background-color: #fff; cursor: pointer;">✕</button>
 	    <button type="submit" style="padding: 10px 20px; border-radius: 20px; border: 1px solid #8a7654; background-color: #8a7654; color: #fff; cursor: pointer;">探索</button>
@@ -134,6 +142,7 @@
 	                    btn.style.border = '1px solid #8a7654';
 	                    btn.style.backgroundColor = '#fff';
 	                    btn.style.cursor = 'pointer';
+						btn.style.fontSize = '16px';  // ← 追加
 	                    btn.addEventListener('click', () => {
 	                        const current = keywordInput.value.trim();
 	                        const words = current === '' ? [] : current.split(/\s+/);
@@ -168,7 +177,7 @@
 	        carouselIndex = 0;
 
 	        resultArea.innerHTML =
-			'<h2 style="margin-bottom: -15px;">「' + currentKeyword + '」にぴったりの曲はこちら！</h2>' +
+			'<h2 style="margin-top: 40px; margin-bottom: -15px;">「' + currentKeyword + '」にぴったりの曲はこちら！</h2>' +
 	            '<div class="carousel-wrapper">' +
 	            '  <div class="carousel-stage" id="carouselStage"></div>' +
 	            '</div>' +
@@ -176,13 +185,14 @@
 	            '  <button type="button" id="prevBtn">‹</button>' +
 	            '  <button type="button" id="nextBtn">›</button>' +
 	            '</div>' +
+				<!-->'<div class='songLinksArea'></div>'+<-->
 	            '<div class="carousel-info" id="carouselInfo"></div>';
 
 	        document.getElementById('prevBtn').addEventListener('click', () => moveCarousel(-1));
 	        document.getElementById('nextBtn').addEventListener('click', () => moveCarousel(1));
 
 	        renderCarousel();
-			setupDragControl(); // ← 追加
+			setupDragControl(); 
 	        loadRandomKeywords();
 	    }
 		function setupDragControl() {
@@ -237,9 +247,10 @@
 		function renderCarousel() {
 		    const stage = document.getElementById('carouselStage');
 		    stage.innerHTML = '';
-
+			
 		    carouselSongs.forEach((song, i) => {
 		        let offset = i - carouselIndex;
+				// 曲数を2で割って中央値を求める
 		        const half = Math.floor(carouselSongs.length / 2);
 		        if (offset > half) offset -= carouselSongs.length;
 		        if (offset < -half) offset += carouselSongs.length;
@@ -260,23 +271,27 @@
 		        const img = document.createElement('img');
 		        img.src = song.imageUrl;
 		        item.appendChild(img);
-
-		        item.addEventListener('click', () => {
-		            if (offset === 0) {
-		                showSongLinks(song);
-		            } else {
-		                carouselIndex = i;
-		                renderCarousel();
-		            }
-		        });
-
+					
+				
+				// リンクを自動表示
+				if (offset === 0) {
+					//cssのクラスを差し替え
+					// document.getElementById("songLinksArea").classList.add(.songLinks.visible)
+				    showSongLinks(song);
+				}
+				
+				item.addEventListener('click', () => {
+					if (offset !== 0){
+				    carouselIndex = i;
+				    renderCarousel();
+					}
+				});
+				
 		        stage.appendChild(item);
 		    });
 
-		    const current = carouselSongs[carouselIndex];
-		    document.getElementById('carouselInfo').innerHTML =
-		        '<strong>' + current.title + '</strong> - ' + current.artist;
 		}
+		
 
 	    function showSongLinks(song) {
 	        let html = '<div style="margin-top: 10px;">';
@@ -288,8 +303,15 @@
 	        }
 	        html += '<a href="' + song.youtubeUrl + '" target="_blank">YouTube</a>';
 	        html += '</div>';
-	        document.getElementById('carouselInfo').innerHTML =
-	            '<strong>' + song.title + '</strong> - ' + song.artist + html;
+
+			document.getElementById('carouselInfo').innerHTML =
+			'<strong style="font-size:25px;">' + song.title + '</strong> - ' + 
+			'<span style="font-size:15px;">' + song.artist +  '</span>' +
+			'<div class="fade-in" id="linkArea">' + html + '</div>';
+			
+			setTimeout(() => {
+			    document.getElementById('linkArea').classList.add('show');
+			}, 1000);
 	    }
 
 		<!-- submitされたときの処理 -->
