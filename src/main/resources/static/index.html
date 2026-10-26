@@ -170,7 +170,8 @@
 						btn.style.fontSize = '16px';  // ← 追加
 	                    btn.addEventListener('click', () => {
 	                        const current = keywordInput.value.trim();
-	                        const words = current === '' ? [] : current.split(/\s+/);
+							// 検索欄が空なら空の配列、そうでなければスペースで区切って配列にする
+							const words = current === '' ? [] : current.split(/[\s　]+/);
 	                        if (!words.includes(kw)) {
 	                            words.push(kw);
 	                        }
@@ -266,6 +267,7 @@
 	        renderCarousel();
 	    }
 
+		//　カバーフローを定義・ジャケ写を挿入
 		function renderCarousel() {
 		    const stage = document.getElementById('carouselStage');
 		    stage.innerHTML = '';
@@ -299,6 +301,7 @@
 				if (offset === 0) {
 					//cssのクラスを差し替え
 					// document.getElementById("songLinksArea").classList.add(.songLinks.visible)
+					// 一曲ずつリンクを取ってくる
 				    showSongLinks(song);
 				}
 				
@@ -315,11 +318,12 @@
 		}
 		
 
+		// 曲のリンクを挿入
 		function showSongLinks(song) {
 		    document.getElementById('carouselInfo').innerHTML =
-		        '<strong style="font-size:25px;">' + song.title + '</strong> - ' +
-		        '<span style="font-size:15px;">' + song.artist + '</span>';
-
+		        '<strong style="font-size:25px;">' + escapeKeyword(song.title) + '</strong> - ' +
+		        '<span style="font-size:15px;">' + escapeKeyword(song.artist) + '</span>';
+				
 		    let html = '';
 		    if (song.spotifyUrl) {
 		        html += '<a href="' + song.spotifyUrl + '" target="_blank">Spotify</a> ' + '/&nbsp' ;
@@ -338,20 +342,24 @@
 		    }, 1000);
 		}
 
-		<!-- submitされたときの処理 -->
+		// submitされたときの処理 
 	    document.getElementById('searchForm').addEventListener('submit', function(event) {
-	        event.preventDefault();
+	    event.preventDefault();
 
-	        const keyword = keywordInput.value;
-	        currentKeyword = keyword;
+		const keyword = keywordInput.value.trim().replace(/[\s　]+/g, ' ');
+		//keyword = escapeKeyword(keyword);
+		currentKeyword = escapeKeyword(keyword);
+		// 検索欄の表示も、半角スペースに揃える
+		keywordInput.value = keyword;
 
-	        if (!keyword.trim()) {
-				<!-- 入力が空文字であれば結果欄は何も表示しない -->
+					// 書き換えられる→ if (!keyword.trim())
+	        if (keyword.trim() === '') {
+				// 入力が空文字であれば結果欄は何も表示しない 
 	            resultArea.innerHTML = '';
 	            return;
 	        }
 
-		<!-- 検索中のアニメーション処理 -->
+		// 検索中のアニメーション処理 
 	        let dotCount = 0;
 	        let cycleCount = 0;
 	        let animationDone = false;
@@ -367,7 +375,7 @@
 	                dotCount = 0;
 	                cycleCount++;
 	                if (cycleCount >= 2) {
-						<!--処理を止める-->
+						// 処理を止める
 	                    clearInterval(animationTimer);
 	                    animationDone = true;
 	                    if (fetchedSongs !== null) {
@@ -378,19 +386,32 @@
 	            }
 	        }, 400);
 
-			<!-- サーバへアクセスする -->
+			// サーバへアクセスする 
 	        fetch('/api/search?keyword=' + encodeURIComponent(keyword))
-			<!-- レスポンスをjsonに変換 -->
+			// レスポンスをjsonに変換 
 	            .then(response => response.json())
 	            .then(songs => {
 	                if (animationDone) {
-					<!--アニメーションが終わっていたら-->
+					// アニメーションが終わっていたら
 	                    showResult(songs);
 	                } else {
 	                    fetchedSongs = songs;
 	                }
 	            });
 	    });
+		
+		
+		function escapeKeyword(nonEscapedKeyword){
+		    return nonEscapedKeyword.replace( /[&<>'"]/g, escapedKeyword => ({
+		      /* エスケープする */
+			'&': '&amp;',   //&
+			'<': '&lt;',    //<
+			'>': '&gt;',    //>
+			"'": '&#39;',   //'
+			'"': '&quot;'   //"
+		    }[escapedKeyword] //&<>'"のいずれかが合った場合対応する文字に置き換える
+			));
+		}
 	</script>
 </body>
 </html>

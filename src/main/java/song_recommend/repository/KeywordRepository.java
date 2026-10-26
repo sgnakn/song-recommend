@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface KeywordRepository extends JpaRepository<Keyword, Long> {
     Optional<Keyword> findByKeyword(String keyword);
 
-    // ランダムにキーワードを取得する（H2のRANDOM()を使う）
+    // ランダムにキーワードを取得する（H2のORDER BY RANDOM()を使う）
     @Query(value = "SELECT * FROM keyword ORDER BY RANDOM() LIMIT :count", nativeQuery = true)
     List<Keyword> findRandomKeywords(int count);
 }

@@ -17,7 +17,7 @@ public class SongApiController {
 
     @GetMapping("/api/search")
     public List<Song> search(@RequestParam String keyword) {
-        return songService.searchByKeywords(keyword); // AND検索版に差し替え
+        return songService.searchByKeywords(keyword);
     }
 
     @GetMapping("/api/random-keywords")
