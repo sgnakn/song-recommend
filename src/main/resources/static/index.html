@@ -83,8 +83,8 @@
 
 		.carousel-nav button {
 		    border-radius: 50%;
-		    width: 36px;
-		    height: 36px;
+		    width: 44px;
+		    height: 44px;
 		    border: 1px solid #8a7654;
 		    background-color: #fff;
 		    cursor: pointer;
@@ -118,7 +118,7 @@
 		    transform: translateX(-50%);
 		    border-width: 0 8px 10px 8px;
 		    border-style: solid;
-		    border-color: transparent transparent #fff transparent;
+		    border-color: transparent transparent #FFF transparent;
 		}
 
 		.fade-in {
@@ -128,7 +128,27 @@
 		.fade-in.show {
 		    opacity: 1;
 		}
+		html, body {
+			cursor: url(angelfish_small.png) 2 3, pointer !important;
+		}	
 
+		.turnButtonColorElement {
+			background-color: #fff;
+			cursor: url(angelfish_small.png) 2 3, pointer;
+		}
+		.turnButtonColorElement:hover{
+			background-color: #00bfff !important;
+			color: #fff;
+			cursor: url(angelfish_small.png) 2 3, pointer;
+		}
+		.turnLetterColorElement {
+		color: #5a4a30;
+		cursor: url(angelfish_small.png) 2 3, pointer;
+		}
+		.turnLetterColorElement:hover{
+		color: #00bfff !important;
+		cursor: url(angelfish_small.png) 2 3, pointer;
+		}
 	</style>
 </head>
 <body>
@@ -136,22 +156,30 @@
 		<img src="logo.png" alt="Music Compass" style="max-width: 300px; width: 100%; margin-bottom: -20px;">
     <h3>キーワードで曲を探そう</h3>
 	<form id="searchForm" style="display: flex; justify-content: center; gap: 8px;  margin-bottom: 12px;">
-	    <input type="text" id="keyword" placeholder="例: 夏 失恋 応援" style="flex: 1; max-width: 400px; padding: 10px 16px; font-size: 15px; border-radius: 20px; border: 1px solid #8a7654;">
-	    <button type="button" id="clearButton" style="padding: 10px 16px; border-radius: 20px; border: 1px solid #8a7654; background-color: #fff; cursor: pointer;">✕</button>
-	    <button type="submit" style="padding: 10px 20px; border-radius: 20px; border: 1px solid #8a7654; background-color: #8a7654; color: #fff; cursor: pointer;">探索</button>
+	    <input type="text" id="keyword" placeholder="例: 冬 バラード" style="cursor: url(angelfish_small.png) 2 3, pointer;
+			background-color: #fff; flex: 1; max-width: 400px; padding: 10px 16px; font-size: 15px; border-radius: 20px; border: 1px solid #8a7654;">
+	    <button type="button" class="turnButtonColorElement" id="clearButton" style="width: 44px; height: 44px; font-size: 20px;padding: 0; border-radius: 50px; border: 1px solid #8a7654; ">✕</button>
+	    <button type="submit" class="turnButtonColorElement" style="height: 44px; padding: 0 24px; font-size: 16px; border-radius: 999px; border: 1px solid #8a7654; ">探索</button>
 	</form>
 
-    <!-- ここから追加：おすすめキーワードのボタン -->
+    <!-- おすすめキーワードのボタン -->
     <div id="keywordSuggestions" style="margin-top: 8px;"></div>
-    <!-- ここまで追加 -->
+	<!-- おすすめキーワードのボタン -->
+
+	<!-- 検索履歴 -->
+	<div id="searchHistory"> </div>
+	<!-- 検索履歴 -->
 
     <div id="resultArea"></div>
-	</div>  <!-- ← ここ。containerを閉じる -->
+	</div>
 	<script>
 	    const keywordInput = document.getElementById('keyword');
 	    const suggestionsArea = document.getElementById('keywordSuggestions');
 	    const resultArea = document.getElementById('resultArea');
+		const searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || []; //localStorage から読み込んで配列を作る(なければ空の配列)
+		const searchHistoryArea = document.getElementById('searchHistory');
 
+		// ランダムなキーワードを表示する
 	    function loadRandomKeywords() {
 	        fetch('/api/random-keywords')
 	            .then(response => response.json())
@@ -159,15 +187,15 @@
 	                suggestionsArea.innerHTML = '';
 	                keywords.forEach(kw => {
 	                    const btn = document.createElement('button');
+						btn.class='buttonElement';
 	                    btn.type = 'button';
 	                    btn.textContent = kw;
 	                    btn.style.marginRight = '6px';
 	                    btn.style.borderRadius = '20px';
-	                    btn.style.padding = '6px 16px';
+	                    btn.style.padding = '10px 16px';
 	                    btn.style.border = '1px solid #8a7654';
-	                    btn.style.backgroundColor = '#fff';
-	                    btn.style.cursor = 'pointer';
-						btn.style.fontSize = '16px';  // ← 追加
+						btn.style.fontSize = '16px';
+						btn.classList.add('turnButtonColorElement');
 	                    btn.addEventListener('click', () => {
 	                        const current = keywordInput.value.trim();
 							// 検索欄が空なら空の配列、そうでなければスペースで区切って配列にする
@@ -183,7 +211,44 @@
 	    }
 
 	    loadRandomKeywords();
-
+		
+		// 検索履歴を表示する
+		function loadSearchHistory() {
+			searchHistoryArea.innerHTML = '';
+			if (searchHistory.length > 0) {
+			searchHistoryArea.style.padding = '10px 15px';
+			searchHistoryArea.style.fontSize='13px';
+			searchHistoryArea.style.marginRight = '6px';
+			searchHistoryArea.style.marginTop='-7px';
+			searchHistoryArea.textContent='[ 履歴 ]';
+			searchHistory.toReversed().forEach(hs => {
+			const btn = document.createElement('button');
+			btn.type = 'button';
+			btn.textContent = hs;
+			btn.style.marginRight = '6px';
+			btn.style.padding = '10px 15px';
+			btn.style.background = 'transparent';
+			btn.style.fontSize = '13px';
+			btn.style.textDecoration = 'underline';
+			btn.style.border = 'none';
+			btn.classList.add('turnLetterColorElement');
+			btn.addEventListener('click', () => {
+				const current = keywordInput.value.trim();
+				// 検索欄が空なら空の配列、そうでなければスペースで区切って配列にする
+				const words = current === '' ? [] : current.split(/[\s　]+/);
+				if (!words.includes(hs)) {
+					words.push(hs);
+				}
+				keywordInput.value = words.join(' ');
+			});
+			searchHistoryArea.appendChild(btn);
+			});
+		}
+		}
+		
+		loadSearchHistory();
+		
+		
 	    document.getElementById('clearButton').addEventListener('click', () => {
 	        keywordInput.value = '';
 	    });
@@ -196,6 +261,7 @@
 	        if (songs.length === 0) {
 	            resultArea.innerHTML = '<p>うーん、「' + currentKeyword + '」に合う曲が見つかりませんでした…😢</p>';
 	            loadRandomKeywords();
+				loadSearchHistory();
 	            return;
 	        }
 
@@ -203,13 +269,13 @@
 	        carouselIndex = 0;
 
 			resultArea.innerHTML =
-			    '<h2 style="margin-top: 30px; margin-bottom: -10px;">「' + currentKeyword + '」にぴったりの曲はこちら！</h2>' +
+			    '<h2 style="margin-top: 13px; margin-bottom: -20px;">「' + currentKeyword + '」にぴったりの曲はこちら！</h2>' +
 			    '<div class="carousel-wrapper">' +
 			    '  <div class="carousel-stage" id="carouselStage"></div>' +
 			    '</div>' +
 			    '<div class="carousel-nav">' +
-			    '  <button type="button" id="prevBtn">‹</button>' +
-			    '  <button type="button" id="nextBtn">›</button>' +
+			    '  <button type="button" class="turnButtonColorElement" id="prevBtn">‹</button>' +
+			    '  <button type="button" class="turnButtonColorElement" id="nextBtn">›</button>' +
 			    '</div>' +
 			    '<div class="carousel-info" id="carouselInfo"></div>' +
 			    '<div id="linkWrapper"></div>';  // ← 新しく追加(リンク専用の置き場所)
@@ -220,6 +286,7 @@
 	        renderCarousel();
 			setupDragControl(); 
 	        loadRandomKeywords();
+			loadSearchHistory();
 	    }
 		function setupDragControl() {
 		    const stage = document.getElementById('carouselStage');
@@ -347,17 +414,29 @@
 	    event.preventDefault();
 
 		const keyword = keywordInput.value.trim().replace(/[\s　]+/g, ' ');
-		//keyword = escapeKeyword(keyword);
 		currentKeyword = escapeKeyword(keyword);
 		// 検索欄の表示も、半角スペースに揃える
 		keywordInput.value = keyword;
 
-					// 書き換えられる→ if (!keyword.trim())
+			// 書き換えられる→ if (!keyword.trim())
 	        if (keyword.trim() === '') {
 				// 入力が空文字であれば結果欄は何も表示しない 
 	            resultArea.innerHTML = '';
 	            return;
 	        }
+			
+			
+			// 検索キーワードの保存
+			if ( !(keyword === searchHistory[searchHistory.length - 1]) ){
+			  if (searchHistory.length<5){    //配列の数が5未満だったら
+			  searchHistory.push(keyword);
+			  }else{
+			  searchHistory.shift();　//配列の最初の要素を削除する
+			  searchHistory.push(keyword);
+			  }
+			  // 配列をJSONに変換する
+			  localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+			}
 
 		// 検索中のアニメーション処理 
 	        let dotCount = 0;
@@ -412,6 +491,7 @@
 		    }[escapedKeyword] //&<>'"のいずれかが合った場合対応する文字に置き換える
 			));
 		}
+
 	</script>
 </body>
 </html>
